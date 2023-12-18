@@ -1,0 +1,13 @@
+__pycache__
+
+#Data files
+datas/data/cv-other-dev
+datas/data/cv-other-test
+datas/data/cv-other-train
+datas/data/cv-valid-dev
+datas/data/cv-valid-test
+datas/data/cv-valid-train
+
+results/model.h5
+results/features.npy
+results/labels.npy

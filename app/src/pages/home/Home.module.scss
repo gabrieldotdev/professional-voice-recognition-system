@@ -1,0 +1,15 @@
+.recording_status {
+    @apply mt-8 flex cursor-pointer flex-col items-start justify-start rounded-2xl border border-dashed border-gray-900/25 px-4 py-6;
+    & .react_player {
+        @apply -mt-16 h-full w-full object-cover
+    }
+}
+.result_container {
+    @apply mt-8;
+    & .span_result {
+        @apply ml-2 font-semibold text-gray-900;
+    }
+    & .processing_results {
+        @apply mt-2 flex cursor-pointer flex-col justify-start rounded-2xl border border-dashed border-gray-900/25 px-4 py-6;
+    }
+}

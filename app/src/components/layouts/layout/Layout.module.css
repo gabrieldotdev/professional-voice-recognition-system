@@ -1,0 +1,3 @@
+.border_dashed_zinc_600_2 {
+    @apply border-2 border-dashed border-zinc-600;
+}
