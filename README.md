@@ -29,11 +29,11 @@ pip3 install -r requirements.txt
 - Testing (Kiểm tra)
 
 ```bash
-python app.test.py --file "datas\audio\19-227-0005.wav"
+python test.py --file "datas\audio\19-227-0005.wav"
 ```
 hoặc
 ```bash
-python app.test.py --f "datas\audio\19-227-0005.wav"
+python test.py --f "datas\audio\19-227-0005.wav"
 ```
 
 - Installation app (Cài đặt ứng dụng)
