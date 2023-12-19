@@ -48,12 +48,18 @@ cd app
 yarn install
 ```
 
-- Run app
+- Run APP & Run API
 
 ```bash
+#APP
 npm start
 ```
 hoặc
 ```bash
+#APP
 yarn start
+```
+```bash
+#API
+python app.py
 ```
