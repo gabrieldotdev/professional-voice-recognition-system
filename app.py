@@ -55,7 +55,8 @@ def predict():
             "gender": gender,
             "maleProb": f"{male_prob * 100:.2f}%",
             "femaleProb": f"{female_prob * 100:.2f}%",
-            "transcription": text_result
+            "transcription": text_result,
+            "language": language
         }
 
         return jsonify(result)

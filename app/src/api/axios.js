@@ -8,4 +8,4 @@ const instance = axios.create({
     },
 });
 
-export const predict = (formData) => instance.post('/predict', formData);
+export const predict = (formData, language) => instance.post(`/predict?language=${language}`, formData);

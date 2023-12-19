@@ -15,7 +15,7 @@ export const RenderRoutes = ({ routes }) => {
                     path={route.path}
                     element={
                         route.isPrivate && !isAuthenticated() ? (
-                            <Navigate to="/auth/login" />
+                            <Navigate to="/" />
                         ) : (
                             <route.layout>
                                 <route.component />

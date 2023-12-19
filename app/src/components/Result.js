@@ -10,10 +10,10 @@ const Result = ({ gender, maleProb, femaleProb, transcription }) => {
     return (
         <Fragment>
             <Text text={`Chuẩn đoán giới tính: ${gender}`} classNames={cls_gender} />
-            <Text text={`Xác suất là nam: ${maleProb}`} />
-            <Text text={`Xác suất là nữ: ${femaleProb}`} />
+            <Text text={`*Tỷ lệ xác suất là nam: ${maleProb}`} />
+            <Text text={`*Tỷ lệ xác suất là nữ: ${femaleProb}`} />
             <div className="flex flex-col">
-                <span className="text-md font-bold tracking-tight">Xuất băn bản: </span>
+                <span className="text-md font-bold tracking-tight">Văn bản: </span>
                 <Text text={`"${transcription}"`} classNames={cls__transcription} />
             </div>
         </Fragment>
