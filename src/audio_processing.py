@@ -117,6 +117,7 @@ def record_to_file(path):
     wf.writeframes(data)
     wf.close()
 
+
 # NOTE: Hàm extract_feature được sử dụng để trích xuất các đặc trưng từ file audio
 def extract_feature(file_name, **kwargs):
     """
@@ -135,7 +136,7 @@ def extract_feature(file_name, **kwargs):
     mel = kwargs.get("mel")
     contrast = kwargs.get("contrast")
     tonnetz = kwargs.get("tonnetz")
-
+    
     X, sample_rate = librosa.core.load(file_name)
     if chroma or contrast:
         stft = np.abs(librosa.stft(X))
@@ -144,15 +145,15 @@ def extract_feature(file_name, **kwargs):
         mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T, axis=0)
         result = np.hstack((result, mfccs))
     if chroma:
-        chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T, axis=0)
+        chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T,axis=0)
         result = np.hstack((result, chroma))
     if mel:
-        mel = np.mean(librosa.feature.melspectrogram(X, sr=sample_rate).T, axis=0)
+        mel = np.mean(librosa.feature.melspectrogram(y=X, sr=sample_rate).T,axis=0)
         result = np.hstack((result, mel))
     if contrast:
-        contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T, axis=0)
+        contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T,axis=0)
         result = np.hstack((result, contrast))
     if tonnetz:
-        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T, axis=0)
+        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
         result = np.hstack((result, tonnetz))
     return result
