@@ -40,7 +40,14 @@ function Home() {
                 <span className={sls.span_result}>Kết quả:</span>
                 {/* <!-- KẾT QUẢ XỬ LÝ --> */}
                 <div className={sls.processing_results}>
-                    <Result gender={result.gender} maleProb={result.maleProb} femaleProb={result.femaleProb} transcription={result.transcription} />
+                    {result && (
+                        <Result
+                            gender={result.gender}
+                            maleProb={result.maleProb}
+                            femaleProb={result.femaleProb}
+                            transcription={result.transcription}
+                        />
+                    )}
                 </div>
             </div>
         </Fragment>

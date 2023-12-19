@@ -1,87 +1,56 @@
-import glob
-import os
-import pandas as pd
-import numpy as np
-import shutil
-import librosa
-from tqdm import tqdm
+import glob  # NOTE: Dùng để tìm kiếm các file trong thư mục
+import os  # NOTE: Dùng để tạo thư mục
+import pandas as pd  # NOTE: Dùng để đọc file csv
+import numpy as np  # NOTE: Dùng để lưu các file audio dưới dạng numpy array
+import librosa  # NOTE: Dùng để xử lý audio
+from tqdm import tqdm  # NOTE: Dùng để hiển thị tiến trình
+from src.audio_processing import extract_feature
 
-
-def extract_feature(file_name, **kwargs):
-    """
-    Extract feature from audio file `file_name`
-        Features supported:
-            - MFCC (mfcc)
-            - Chroma (chroma)
-            - MEL Spectrogram Frequency (mel)
-            - Contrast (contrast)
-            - Tonnetz (tonnetz)
-        e.g:
-        `features = extract_feature(path, mel=True, mfcc=True)`
-    """
-    mfcc = kwargs.get("mfcc")
-    chroma = kwargs.get("chroma")
-    mel = kwargs.get("mel")
-    contrast = kwargs.get("contrast")
-    tonnetz = kwargs.get("tonnetz")
-    X, sample_rate = librosa.core.load(file_name)
-    if chroma or contrast:
-        stft = np.abs(librosa.stft(X))
-    result = np.array([])
-    if mfcc:
-        mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T, axis=0)
-        result = np.hstack((result, mfccs))
-    if chroma:
-        chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T,axis=0)
-        result = np.hstack((result, chroma))
-    if mel:
-        mel = np.mean(librosa.feature.melspectrogram(X, sr=sample_rate).T,axis=0)
-        result = np.hstack((result, mel))
-    if contrast:
-        contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T,axis=0)
-        result = np.hstack((result, contrast))
-    if tonnetz:
-        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
-        result = np.hstack((result, tonnetz))
-    return result
-
+# NOTE: Tạo thư mục 'data' nếu thư mục đó chưa tồn tại
 dirname = "data"
-
 if not os.path.isdir(dirname):
     os.mkdir(dirname)
 
-
+# NOTE: Tìm tất cả các file CSV trong thư mục
 csv_files = glob.glob("*.csv")
 
+# NOTE: Duyệt qua từng file CSV để tiến hành xử lý
 for j, csv_file in enumerate(csv_files):
     print("[+] Preprocessing", csv_file)
     df = pd.read_csv(csv_file)
-    # only take filename and gender columns
+
+    # NOTE: Chỉ lấy cột filename và gender
     new_df = df[["filename", "gender"]]
     print("Previously:", len(new_df), "rows")
-    # take only male & female genders (i.e droping NaNs & 'other' gender)
+
+    # NOTE: Chỉ lấy giới tính là male hoặc female, bỏ qua NaNs và giới tính 'other'
     new_df = new_df[np.logical_or(new_df['gender'] == 'female', new_df['gender'] == 'male')]
     print("Now:", len(new_df), "rows")
+
+    # NOTE: Đặt tên cho file CSV đã xử lý và lưu lại
     new_csv_file = os.path.join(dirname, csv_file)
-    # save new preprocessed CSV 
     new_df.to_csv(new_csv_file, index=False)
-    # get the folder name
+
+    # NOTE: Lấy tên thư mục và danh sách các file âm thanh trong thư mục đó
     folder_name, _ = csv_file.split(".")
     audio_files = glob.glob(f"{folder_name}/{folder_name}/*")
     all_audio_filenames = set(new_df["filename"])
+
+    # NOTE: Duyệt qua từng file âm thanh để trích xuất đặc trưng
     for i, audio_file in tqdm(list(enumerate(audio_files)), f"Extracting features of {folder_name}"):
         splited = os.path.split(audio_file)
-        # audio_filename = os.path.join(os.path.split(splited[0])[-1], splited[-1])
         audio_filename = f"{os.path.split(splited[0])[-1]}/{splited[-1]}"
-        # print("audio_filename:", audio_filename)
+
+        # NOTE: Nếu tên file âm thanh có trong danh sách, thì tiến hành trích xuất đặc trưng
         if audio_filename in all_audio_filenames:
-            # print("Copyying", audio_filename, "...")
             src_path = f"{folder_name}/{audio_filename}"
             target_path = f"{dirname}/{audio_filename}"
-            #create that folder if it doesn't exist
+
+            # NOTE: Tạo thư mục nếu thư mục đó chưa tồn tại
             if not os.path.isdir(os.path.dirname(target_path)):
                 os.mkdir(os.path.dirname(target_path))
+
+            # NOTE: Trích xuất đặc trưng và lưu vào file numpy
             features = extract_feature(src_path, mel=True)
             target_filename = target_path.split(".")[0]
             np.save(target_filename, features)
-            # shutil.copyfile(src_path, target_path)

@@ -15,11 +15,11 @@ RATE = 16000 #NOTE: Tốc độ lấy mẫu âm thanh (16KHz = 16000 mẫu/s)
 SILENCE = 30 #NOTE: Ngưỡng thời gian âm thanh yên lặng (30 mẫu = 30/16000 = 0.001875s) => 0.001875s âm thanh yên lặng thì dừng ghi âm
 
 def is_silent(snd_data):
-    "Returns 'True' if below the 'silent' threshold"
+    #NOTE: "Trả về 'True' nếu âm thanh nhỏ hơn ngưỡng 'silent'"
     return max(snd_data) < THRESHOLD
 
 def normalize(snd_data):
-    "Average the volume out"
+    #NOTE: "Làm cho âm thanh có cường độ trung bình bằng 0"
     MAXIMUM = 16384
     times = float(MAXIMUM)/max(abs(i) for i in snd_data)
 
@@ -29,7 +29,7 @@ def normalize(snd_data):
     return r
 
 def trim(snd_data):
-    "Trim the blank spots at the start and end"
+    #NOTE: "Cắt bỏ âm thanh yên lặng ở đầu và cuối"
     def _trim(snd_data):
         snd_started = False
         r = array('h')
@@ -43,17 +43,17 @@ def trim(snd_data):
                 r.append(i)
         return r
 
-    # Trim to the left
+    #NOTE: Cắt bỏ âm thanh yên lặng ở đầu
     snd_data = _trim(snd_data)
 
-    # Trim to the right
+    #NOTE: Cắt bỏ âm thanh yên lặng ở cuối
     snd_data.reverse()
     snd_data = _trim(snd_data)
     snd_data.reverse()
     return snd_data
 
 def add_silence(snd_data, seconds):
-    "Add silence to the start and end of 'snd_data' of length 'seconds' (float)"
+    #NOTE: Thêm âm thanh yên lặng vào đầu và cuối 'snd_data' với độ dài 'seconds' (float)
     r = array('h', [0 for i in range(int(seconds*RATE))])
     r.extend(snd_data)
     r.extend([0 for i in range(int(seconds*RATE))])
@@ -61,12 +61,12 @@ def add_silence(snd_data, seconds):
 
 def record():
     """
-    Record a word or words from the microphone and 
-    return the data as an array of signed shorts.
-    Normalizes the audio, trims silence from the 
-    start and end, and pads with 0.5 seconds of 
-    blank sound to make sure VLC et al can play 
-    it without getting chopped off.
+    #NOTE: Ghi âm một từ hoặc một vài từ từ microphone và
+    #NOTE: trả về dữ liệu dưới dạng một mảng các số nguyên có dấu
+    #NOTE: Chuẩn hóa âm thanh, cắt bỏ âm thanh yên lặng ở đầu và cuối
+    #NOTE: và thêm 0.5s âm thanh yên lặng vào đầu và cuối
+    #NOTE: để đảm bảo VLC có thể phát
+    #NOTE: mà không bị cắt bỏ.
     """
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT, channels=1, rate=RATE,
@@ -79,7 +79,7 @@ def record():
     r = array('h')
 
     while 1:
-        # little endian, signed short
+        #NOTE: little endian: byte thấp nhất ở địa chỉ nhỏ nhất
         snd_data = array('h', stream.read(CHUNK_SIZE))
         if byteorder == 'big':
             snd_data.byteswap()
@@ -106,7 +106,7 @@ def record():
     return sample_width, r
 
 def record_to_file(path):
-    "Records from the microphone and outputs the resulting data to 'path'"
+    #NOTE: "Ghi âm từ microphone và xuất dữ liệu ra 'path'"
     sample_width, data = record()
     data = pack('<' + ('h'*len(data)), *data)
 
@@ -117,18 +117,17 @@ def record_to_file(path):
     wf.writeframes(data)
     wf.close()
 
-
-
+# NOTE: Hàm extract_feature được sử dụng để trích xuất các đặc trưng từ file audio
 def extract_feature(file_name, **kwargs):
     """
-    Extract feature from audio file `file_name`
-        Features supported:
+    # NOTE: Trích xuất feature từ file audio `file_name`
+        # NOTE: Các feature được hỗ trợ:
             - MFCC (mfcc)
             - Chroma (chroma)
             - MEL Spectrogram Frequency (mel)
             - Contrast (contrast)
             - Tonnetz (tonnetz)
-        e.g:
+        # NOTE: Ví dụ:
         `features = extract_feature(path, mel=True, mfcc=True)`
     """
     mfcc = kwargs.get("mfcc")
@@ -136,6 +135,7 @@ def extract_feature(file_name, **kwargs):
     mel = kwargs.get("mel")
     contrast = kwargs.get("contrast")
     tonnetz = kwargs.get("tonnetz")
+
     X, sample_rate = librosa.core.load(file_name)
     if chroma or contrast:
         stft = np.abs(librosa.stft(X))
@@ -144,15 +144,15 @@ def extract_feature(file_name, **kwargs):
         mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T, axis=0)
         result = np.hstack((result, mfccs))
     if chroma:
-        chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T,axis=0)
+        chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T, axis=0)
         result = np.hstack((result, chroma))
     if mel:
-        mel = np.mean(librosa.feature.melspectrogram(y=X, sr=sample_rate).T,axis=0)
+        mel = np.mean(librosa.feature.melspectrogram(X, sr=sample_rate).T, axis=0)
         result = np.hstack((result, mel))
     if contrast:
-        contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T,axis=0)
+        contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T, axis=0)
         result = np.hstack((result, contrast))
     if tonnetz:
-        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
+        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T, axis=0)
         result = np.hstack((result, tonnetz))
     return result
