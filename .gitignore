@@ -7,7 +7,3 @@ datas/data/cv-other-train
 datas/data/cv-valid-dev
 datas/data/cv-valid-test
 datas/data/cv-valid-train
-
-results/model.h5
-results/features.npy
-results/labels.npy
