@@ -137,23 +137,36 @@ def extract_feature(file_name, **kwargs):
     contrast = kwargs.get("contrast")
     tonnetz = kwargs.get("tonnetz")
     
+    # NOTE: Sử dụng thư viện librosa để tải file âm thanh và lấy tần số lấy mẫu
     X, sample_rate = librosa.core.load(file_name)
+    # NOTE: Nếu được yêu cầu, tính toán biến đổi âm thanh
     if chroma or contrast:
         stft = np.abs(librosa.stft(X))
+    # NOTE: Khởi tạo mảng kết quả là một mảng rỗng
     result = np.array([])
+    
+    # NOTE: Nếu được yêu cầu, thêm đặc trưng MFCC vào mảng kết quả
     if mfcc:
         mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T, axis=0)
         result = np.hstack((result, mfccs))
+    
+    # NOTE: Nếu được yêu cầu, thêm đặc trưng Chroma vào mảng kết quả
     if chroma:
-        chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T,axis=0)
+        chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T, axis=0)
         result = np.hstack((result, chroma))
+    
+    # NOTE: Nếu được yêu cầu, thêm đặc trưng MEL Spectrogram Frequency vào mảng kết quả
     if mel:
-        mel = np.mean(librosa.feature.melspectrogram(y=X, sr=sample_rate).T,axis=0)
+        mel = np.mean(librosa.feature.melspectrogram(y=X, sr=sample_rate).T, axis=0)
         result = np.hstack((result, mel))
+    
+    # NOTE: Nếu được yêu cầu, thêm đặc trưng Contrast vào mảng kết quả
     if contrast:
-        contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T,axis=0)
+        contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T, axis=0)
         result = np.hstack((result, contrast))
+    
+    # NOTE: Nếu được yêu cầu, thêm đặc trưng Tonnetz vào mảng kết quả
     if tonnetz:
-        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
+        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T, axis=0)
         result = np.hstack((result, tonnetz))
     return result
