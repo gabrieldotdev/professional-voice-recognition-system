@@ -42,22 +42,11 @@ python test.py --f "datas\audio\19-227-0005.wav"
 cd app
 npm install
 ```
-hoặc
-```bash
-cd app
-yarn install
-```
-
 - Run APP & Run API
 
 ```bash
 #APP
 npm start
-```
-hoặc
-```bash
-#APP
-yarn start
 ```
 ```bash
 #API
